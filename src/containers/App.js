@@ -5,44 +5,38 @@ import SearchBox from '../components/SearchBox';
 import Scroll from "../components/Scroll";
 import './App.css';
 
-import  { setSearchField } from "../redux/actions.js";
+import  { requestRobots, setSearchField } from "../redux/actions.js";
 
 const mapStateToProps = state => {
     return {
-        searchField: state.searchField
+        searchField: state.searchRobots.searchField,
+        robots: state.requestRobots.robots,
+        isPending: state.requestRobots.isPending,
+        error: state.requestRobots.error
     }
 }
 
 const mapDispatchToProps = (dispatch)  => {
     return {
-        onSearchChange: (event) => dispatch(setSearchField(event.target.value))
+        onSearchChange: (event) => dispatch(setSearchField(event.target.value)),
+        onRequestRobots: () => dispatch(requestRobots())
     }
 }
 
 const App = (store) => {
 
-    const [robots, setRobots] = useState([]);
-
-   
-    useEffect( () => {
-        fetchRobots();
-    }, [])
-
-    const fetchRobots = () => {
-        fetch('https://jsonplaceholder.typicode.com/users')
-        .then(res => res.json())
-        .then(users => setRobots(users)); 
-    }
-
-  
-
-    console.log(store);
-    const { searchField, onSearchChange } = store;
+    const { searchField, onSearchChange, robots, isPending } = store;
     const filteredRobots = robots.filter(robot => {
         return robot.name.toLowerCase().includes(searchField.toLowerCase());
     });
 
-    return !robots.length ? 
+   
+    useEffect( () => {
+        store.onRequestRobots()
+    }, [])
+
+
+    return isPending ? 
     <h1> Loading </h1> :  
         (
         <div className="tc">
